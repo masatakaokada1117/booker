@@ -52,7 +52,11 @@ gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 
 gem 'unicorn'
 
+# devise(ログイン機能)
 gem 'devise'
+
+# devise日本語化
+gem 'devise-i18n'
 
 # コーディング規約チェック
 gem 'rubocop'
