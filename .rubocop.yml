@@ -1,0 +1,52 @@
+require:
+  - rubocop-rails
+
+Rails:
+  Enabled: true
+
+AllCops:
+  Exclude:
+    - 'bin/bundle'
+    - "node_modules/**/*"
+    - 'db/schema.rb'
+    - 'vendor/**/*'
+
+# 日本語でのコメントを許可
+AsciiComments:
+  Enabled: false
+
+# 最大文字数
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - 'config/initializers/devise.rb'
+
+# rspec関連のみブロックの行数を無視する
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+
+# メソッドの長さ
+Metrics/MethodLength:
+  Max: 20
+  Exclude:
+    - 'db/migrate/*.rb'
+
+# devise_helperのみ適用しない
+Rails/OutputSafety:
+  Exclude:
+    - 'app/helpers/devise_helper.rb'
+
+# 文字列リテラルをfreezeしない
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+# ドキュメントの無い public class を許可する
+Style/Documentation:
+  Enabled: false
+
+# includeなどはclass直下に書く
+Style/MixinUsage:
+  Exclude:
+    - "bin/setup"
+    - "bin/update"
