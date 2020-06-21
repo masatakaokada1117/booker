@@ -3,13 +3,93 @@ orbs:
   ruby: circleci/ruby@0.1.2 
 
 jobs:
-  build:
+  rubocop:
     docker:
       - image: circleci/ruby:2.6.3-stretch-node
+        environment:
+          RAILS_ENV: test
+          MYSQL_PASSWORD: ''
+          MYSQL_HOST: 127.0.0.1
+
+      - image: circleci/mysql:8.0
+        command: mysqld --default-authentication-plugin=mysql_native_password
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+
     executor: ruby/default
+
+    working_directory: ~/repo
+
+    steps:
+      # ジョブの working_directory にチェックアウト
+      - checkout
+
+      # keyの内容を元に保存されていたキャッシュを復元
+      - restore_cache:
+          # 復元するキャッシュキーのリスト
+          keys:
+            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+            # 完全に一致するものが見つからない場合、最新のキャッシュを使用するようにする
+            - v1-dependencies-
+
+      - run: 
+          name: bundle install
+          command: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run: yarn install
+
+      # キャッシュの生成と保存
+      - save_cache:
+          paths:
+            - ./vendor/bundle
+          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+
+      # Rubocop
+      - run:
+          name: Rubocop
+          command: bundle exec rubocop
+
+  rspec:
+    docker:
+      - image: circleci/ruby:2.6.3-stretch-node
+        environment:
+          RAILS_ENV: test
+          MYSQL_PASSWORD: ''
+          MYSQL_HOST: 127.0.0.1
+
+      - image: circleci/mysql:8.0
+        command: mysqld --default-authentication-plugin=mysql_native_password
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+
+    executor: ruby/default
+
+    working_directory: ~/repo
+
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+            - v1-dependencies-
+      - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run: yarn install
+      - save_cache:
+          paths:
+            - ./vendor/bundle
+          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+      - run: bundle exec rake db:create
+      - run: bundle exec rake db:schema:load
+
+      # Rspec
       - run:
-          name: Which bundler?
-          command: bundle -v
-      - ruby/bundle-install
+          name: Rspec
+          command: bundle exec rspec
+
+workflows:
+  version: 2
+  rubocop_rspec:
+    jobs:
+      - rubocop
+      - rspec:
+          requires:
+            - rubocop
