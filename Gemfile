@@ -61,3 +61,9 @@ gem 'devise-i18n'
 # コーディング規約チェック
 gem 'rubocop'
 gem 'rubocop-rails'
+
+# ハッシュをActiveRecordと同じようにデータを操作
+gem 'active_hash'
+
+# ページネーション
+gem 'kaminari'
