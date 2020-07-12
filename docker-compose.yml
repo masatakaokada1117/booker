@@ -4,12 +4,14 @@ services:
     build:
       context: .
       dockerfile: ./docker/rails/Dockerfile
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec unicorn -p 3000 -c /app/config/unicorn.rb"
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
     ports:
       - '3000:3000'
     volumes:
       - .:/app
       - /app/tmp
+      # socketファイルの共有
+      - sockets:/app/tmp/sockets
     depends_on:
       - db
 
@@ -30,8 +32,12 @@ services:
       dockerfile: ./docker/nginx/Dockerfile
     ports:
       - '80:80'
+    #socketファイルの共有
+    volumes: 
+      - sockets:/app/tmp/sockets
     depends_on:
       - app
 
 volumes:
   db-data:
+  sockets:
