@@ -23,3 +23,5 @@ RUN bundle install
 ADD . $APP_HOME
 
 EXPOSE 3000
+
+RUN RAILS_ENV=${RAILS_ENV} bundle exec rails webpacker:compile
