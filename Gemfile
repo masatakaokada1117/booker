@@ -70,3 +70,6 @@ gem 'active_hash'
 
 # ページネーション
 gem 'kaminari'
+
+# エラーメッセージの日本語化
+gem 'rails-i18n'
